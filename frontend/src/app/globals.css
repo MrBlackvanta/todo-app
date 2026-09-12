@@ -4,6 +4,94 @@
 
 @custom-variant dark (&:is(.dark, .dark *));
 
+:root {
+  --page: #fafafa;
+  --surface: #ffffff;
+  --ink: #494c6b;
+  --ink-hover: #494c6b;
+  --muted: #66677a;
+  --dim: #72758e;
+  --divider: #e3e4f1;
+  --edge: #8d91c6;
+  --accent: #246cfd;
+  --cast: #c2c3d680;
+}
+
+html.dark {
+  --page: #171823;
+  --surface: #25273d;
+  --ink: #c8cbe7;
+  --ink-hover: #e3e4f1;
+  --muted: #9b9db7;
+  --dim: #8a8ea7;
+  --divider: #393a4b;
+  --edge: #6d6f90;
+  --accent: #528bfd;
+  --cast: #00000080;
+}
+
 @theme {
   --font-sans: var(--font-josefin-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-hover: var(--ink-hover);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-divider: var(--divider);
+  --color-edge: var(--edge);
+  --color-accent: var(--accent);
+  --color-check-start: #55ddff;
+  --color-check-end: #c058f3;
+
+  --text-logo: 1.625rem;
+  --text-logo--line-height: 1;
+  --text-logo-lg: 2.5rem;
+  --text-logo-lg--line-height: 1;
+
+  --tracking-item: -0.0139em;
+  --tracking-logo: 0.375em;
+
+  --container-app: 33.75rem;
+  --radius-card: 0.3125rem;
+  --shadow-card: 0 2.1875rem 3.125rem -0.9375rem var(--cast);
+}
+
+@layer base {
+  html {
+    @apply font-sans;
+    color-scheme: light;
+    overflow-y: scroll;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-page text-ink tracking-item leading-none;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    @apply outline-accent outline-2 outline-offset-2;
+  }
+}
+
+@utility v-band-focus {
+  @apply focus-visible:outline-white;
+}
+
+@utility v-check-fill {
+  @apply from-check-start to-check-end bg-linear-to-br/srgb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
