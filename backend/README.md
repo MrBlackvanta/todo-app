@@ -150,5 +150,6 @@ Render spins a free instance down after roughly fifteen minutes, which now costs
 start of about a minute rather than the database. A managed Postgres project on a free plan
 typically pauses after some days of no queries; the data survives, but restoring it is
 manual. `/health` runs a database probe and is exempt from the rate limit, so a single
-scheduled request to it resets both timers at once. `keepalive/` holds the worker that does
-this.
+scheduled request to it resets both timers at once. A cron worker outside this repository
+sends one every five minutes through the working day, and one database-touching request
+daily. Anyone self-hosting this needs their own equivalent, or a paid plan that never sleeps.
