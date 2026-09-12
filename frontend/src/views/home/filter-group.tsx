@@ -20,11 +20,7 @@ export default function FilterGroup({
           type="button"
           aria-pressed={filter === name}
           onClick={() => onChange(name)}
-          className={
-            filter === name
-              ? "text-accent font-bold motion-safe:transition-[color]"
-              : "text-muted hover:text-ink-hover font-bold motion-safe:transition-[color]"
-          }
+          className={`font-bold motion-safe:transition-[color] ${filter === name ? "text-accent" : "text-muted hover:text-ink-hover"}`}
         >
           {filterLabels[name]}
         </button>

@@ -34,24 +34,38 @@ export function shiftFrom(element: HTMLElement, distance: number) {
   );
 }
 
+function slide(element: HTMLElement, frames: Keyframe[], easing: string) {
+  element.style.overflow = "clip";
+
+  return settle(
+    element.animate(frames, { duration: collapseDuration, easing }),
+  ).then(() => {
+    element.style.overflow = "";
+  });
+}
+
 export function openRow(element: HTMLElement) {
   if (prefersReducedMotion()) return;
 
-  void settle(
-    element.animate(
-      [{ height: "0px" }, { height: `${element.offsetHeight}px` }],
-      { duration: collapseDuration, easing: "ease-out" },
-    ),
+  void slide(
+    element,
+    [
+      { height: "0px", transform: "translateX(-100%)" },
+      { height: `${element.offsetHeight}px`, transform: "none" },
+    ],
+    "ease-out",
   );
 }
 
 export function closeRow(element: HTMLElement) {
   if (prefersReducedMotion()) return Promise.resolve();
 
-  return settle(
-    element.animate(
-      [{ height: `${element.offsetHeight}px` }, { height: "0px" }],
-      { duration: collapseDuration, easing: "ease-in" },
-    ),
+  return slide(
+    element,
+    [
+      { height: `${element.offsetHeight}px`, transform: "none" },
+      { height: "0px", transform: "translateX(100%)" },
+    ],
+    "ease-in",
   );
 }

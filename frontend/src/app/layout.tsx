@@ -1,7 +1,7 @@
-import type { Metadata, Viewport } from "next";
-import { Josefin_Sans } from "next/font/google";
 import { SITE_URL } from "@/app/site";
 import { themeScript, todosScript } from "@/lib";
+import type { Metadata, Viewport } from "next";
+import { Josefin_Sans } from "next/font/google";
 import "./globals.css";
 
 const name = "TODO";

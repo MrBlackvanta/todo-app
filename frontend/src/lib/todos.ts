@@ -1,10 +1,12 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import type { Todo } from "@/types";
+import { useSyncExternalStore } from "react";
 import { randomUuid } from "./id";
 import { scheduleSave, startSync } from "./sync";
 import { reservedRowsProperty, todosStorageKey } from "./todosScript";
+
+export const titleMaxLength = 200;
 
 const listeners = new Set<() => void>();
 const none: Todo[] = [];
@@ -91,6 +93,15 @@ export function toggleTodo(id: string) {
     read().map((todo) =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo,
     ),
+  );
+}
+
+export function renameTodo(id: string, title: string) {
+  const trimmed = title.trim();
+  if (!trimmed) return;
+
+  commit(
+    read().map((todo) => (todo.id === id ? { ...todo, title: trimmed } : todo)),
   );
 }
 

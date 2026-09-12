@@ -3,8 +3,8 @@
 import { moveTodo, shiftFrom } from "@/lib";
 import type { Todo } from "@/types";
 import { useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import type { KeyboardEvent, PointerEvent } from "react";
+import { flushSync } from "react-dom";
 
 const dragThreshold = 5;
 const touchHoldDelay = 400;
@@ -140,17 +140,17 @@ export function useReorder(todos: Todo[], enabled: boolean) {
       Math.max(event.clientY - current.offsetInRow, bounds.top),
       bounds.bottom - current.row.offsetHeight,
     );
-    const centre = wanted + current.row.offsetHeight / 2;
+    const trailing = wanted + current.row.offsetHeight;
 
     let target = current.index;
     for (const [position, row] of [...list.children].entries()) {
       if (row === current.row) continue;
       const box = row.getBoundingClientRect();
       const middle = box.top + box.height / 2;
-      if (position < current.index && centre < middle) {
+      if (position < current.index && wanted < middle) {
         target = Math.min(target, position);
       }
-      if (position > current.index && centre > middle) {
+      if (position > current.index && trailing > middle) {
         target = Math.max(target, position);
       }
     }
