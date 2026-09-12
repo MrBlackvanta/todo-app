@@ -97,6 +97,7 @@ export function startSync(local: Todo[], adopt: (todos: Todo[]) => void) {
   const shared = new URLSearchParams(window.location.search).get(listParam);
   const saved = store?.getItem(listIdKey);
   const adopting = Boolean(shared) && local.length === 0;
+  const known = adopting || Boolean(saved);
 
   listId = adopting ? shared! : (saved ?? randomUuid());
   store?.setItem(listIdKey, listId);
@@ -108,7 +109,7 @@ export function startSync(local: Todo[], adopt: (todos: Todo[]) => void) {
   }
 
   if (local.length > 0) scheduleSave(local);
-  else void pull(adopt);
+  else if (known) void pull(adopt);
 
   pollTimer = window.setInterval(poll, pollInterval);
   document.addEventListener("visibilitychange", poll);

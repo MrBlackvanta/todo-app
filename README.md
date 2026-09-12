@@ -15,6 +15,7 @@ challenge on Frontend Mentor.
 - TypeScript
 - Tailwind CSS
 - .NET (see `backend/`)
+- PostgreSQL
 
 ## Author
 

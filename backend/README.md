@@ -60,13 +60,18 @@ dotnet ef migrations add <Name> -o Data/Migrations
 `{id}` is a v4 GUID the browser generates for itself. There are no accounts: the id is the
 capability, so it is generated with `crypto` randomness and never guessed. Item ids are
 opaque strings the client owns; the server bounds their length and never interprets them.
+They are keyed as `(ListId, Id)`, so they need only be unique inside their own list — which
+is exactly what the request validator already enforces.
 
 A `PUT` replaces the list wholesale and array order becomes stored order, which is why a
 drag-to-reorder needs no extra endpoint. Requests are rejected with 400 when a list exceeds
 200 items, a title is empty or over 200 characters, or two items share an id.
 
-Responses are never cached. These are per-client mutable lists, so a shared cache would be
-wrong at any TTL.
+Responses carry `Cache-Control: no-store` and `Vary: Origin`. These are per-client mutable
+lists that the browser polls every five seconds, so a shared cache would be wrong at any TTL,
+and `Vary` stops an intermediary handing one origin's CORS headers to another. Preflight
+replies are the exception and stay cacheable: the header middleware sits after the CORS
+middleware, which answers `OPTIONS` without calling further into the pipeline.
 
 ## Storage
 

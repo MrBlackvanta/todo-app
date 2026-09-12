@@ -21,7 +21,7 @@ public class TodoDbContext(DbContextOptions<TodoDbContext> options) : DbContext(
 
         modelBuilder.Entity<TodoItem>(b =>
         {
-            b.HasKey(item => item.Id);
+            b.HasKey(item => new { item.ListId, item.Id });
             b.Property(item => item.Id).ValueGeneratedNever().HasMaxLength(TodoLimits.IdLength);
             b.Property(item => item.Title).HasMaxLength(TodoLimits.TitleLength);
             b.HasIndex(item => new { item.ListId, item.Position });

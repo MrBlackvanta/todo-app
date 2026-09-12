@@ -61,6 +61,7 @@ app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCors();
+app.Use(NeverCache);
 app.UseRateLimiter();
 
 app.MapHealthChecks("/health").DisableRateLimiting();
@@ -129,6 +130,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static Task NeverCache(HttpContext context, RequestDelegate next)
+{
+    context.Response.Headers.CacheControl = "no-store";
+    context.Response.Headers.Vary = "Origin";
+
+    return next(context);
+}
 
 static async Task<bool> ListsTableResponds(TodoDbContext db, CancellationToken token)
 {
