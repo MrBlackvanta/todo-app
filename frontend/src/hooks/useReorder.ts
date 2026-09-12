@@ -136,17 +136,21 @@ export function useReorder(todos: Todo[], enabled: boolean) {
     if (!list) return;
 
     const bounds = list.getBoundingClientRect();
+    const height = current.row.offsetHeight;
     const wanted = Math.min(
       Math.max(event.clientY - current.offsetInRow, bounds.top),
-      bounds.bottom - current.row.offsetHeight,
+      bounds.bottom - height,
     );
-    const trailing = wanted + current.row.offsetHeight;
+    const trailing = wanted + height;
 
+    const rows = [...list.children] as HTMLElement[];
     let target = current.index;
-    for (const [position, row] of [...list.children].entries()) {
-      if (row === current.row) continue;
-      const box = row.getBoundingClientRect();
-      const middle = box.top + box.height / 2;
+    let slotTop = bounds.top;
+
+    for (const [position, row] of rows.entries()) {
+      const middle = slotTop + row.offsetHeight / 2;
+      slotTop += row.offsetHeight;
+
       if (position < current.index && wanted < middle) {
         target = Math.min(target, position);
       }

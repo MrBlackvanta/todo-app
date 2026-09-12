@@ -62,7 +62,6 @@ export default function TodoRow({
       className="group/row bg-surface data-[dragging]:relative data-[dragging]:z-10"
     >
       <div
-        dir="auto"
         className={`border-divider flex items-center gap-3 border-b px-5 py-4 sm:gap-6 sm:px-6 sm:py-5 ${editing ? "v-field-focus" : ""}`}
       >
         {editing ? (
@@ -101,8 +100,9 @@ export default function TodoRow({
                 <CheckIcon className="v-tick w-2.25 text-white sm:w-2.75" />
               </span>
               <span
+                dir="auto"
                 data-done={todo.completed || undefined}
-                className="text-item sm:text-item-lg text-ink data-[done]:text-dim wrap-anywhere data-[done]:line-through motion-safe:transition-[color]"
+                className="text-item sm:text-item-lg text-ink data-[done]:text-dim min-w-0 flex-1 wrap-anywhere data-[done]:line-through motion-safe:transition-[color]"
               >
                 {todo.title}
               </span>
