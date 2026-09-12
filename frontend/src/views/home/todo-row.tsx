@@ -56,8 +56,8 @@ export default function TodoRow({
           <span
             className={
               todo.completed
-                ? "text-dim text-item sm:text-item-lg line-through motion-safe:transition-colors"
-                : "text-ink text-item sm:text-item-lg motion-safe:transition-colors"
+                ? "text-dim text-item sm:text-item-lg line-through motion-safe:transition-[color]"
+                : "text-ink text-item sm:text-item-lg motion-safe:transition-[color]"
             }
           >
             {todo.title}
@@ -66,7 +66,7 @@ export default function TodoRow({
         <button
           type="button"
           onClick={remove}
-          className="v-row-action text-ink dark:text-muted shrink-0 group-focus-within/row:opacity-100 group-hover/row:opacity-100 motion-safe:transition"
+          className="v-row-action text-ink dark:text-muted shrink-0 group-focus-within/row:opacity-100 group-hover/row:opacity-100 motion-safe:transition-[opacity]"
         >
           <span className="sr-only">Delete {todo.title}</span>
           <CrossIcon className="size-3 sm:size-4.5" />

@@ -22,8 +22,8 @@ export default function FilterGroup({
           onClick={() => onChange(name)}
           className={
             filter === name
-              ? "text-accent font-bold motion-safe:transition-colors"
-              : "text-muted hover:text-ink-hover font-bold motion-safe:transition-colors"
+              ? "text-accent font-bold motion-safe:transition-[color]"
+              : "text-muted hover:text-ink-hover font-bold motion-safe:transition-[color]"
           }
         >
           {filterLabels[name]}

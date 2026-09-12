@@ -4,10 +4,10 @@ import { useReorder } from "@/hooks";
 import { countActive, filterTodos, useTodos } from "@/lib";
 import type { TodoFilter } from "@/types";
 import { useState } from "react";
-import AddTodoForm from "./AddTodoForm";
-import FilterGroup from "./FilterGroup";
-import TodoFooter from "./TodoFooter";
-import TodoList from "./TodoList";
+import AddTodoForm from "./add-todo-form";
+import FilterGroup from "./filter-group";
+import TodoFooter from "./todo-footer";
+import TodoList from "./todo-list";
 
 const reorderHelpId = "reorder-help";
 

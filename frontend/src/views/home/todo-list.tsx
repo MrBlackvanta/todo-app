@@ -1,6 +1,6 @@
 import type { Todo, TodoFilter } from "@/types";
 import type { DOMAttributes } from "react";
-import TodoRow from "./TodoRow";
+import TodoRow from "./todo-row";
 
 const emptyMessages: Record<TodoFilter, string> = {
   all: "Nothing here yet — add your first task above.",

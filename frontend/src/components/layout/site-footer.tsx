@@ -1,4 +1,4 @@
-import Signature from "./Signature";
+import Signature from "./signature";
 
 export default function SiteFooter() {
   return (

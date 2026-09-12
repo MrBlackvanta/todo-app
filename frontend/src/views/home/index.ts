@@ -1,1 +1,1 @@
-export { default as TodoBoard } from "./TodoBoard";
+export { default as TodoBoard } from "./todo-board";

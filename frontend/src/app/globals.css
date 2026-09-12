@@ -132,9 +132,9 @@ html.dark {
 }
 
 @utility v-field-focus {
-  @apply motion-safe:transition-colors;
+  @apply motion-safe:transition-[background-color];
   &:has(:focus-visible) {
-    @apply bg-field outline-accent outline-2 outline-offset-2;
+    @apply bg-field outline-2 outline-transparent;
   }
 }
 

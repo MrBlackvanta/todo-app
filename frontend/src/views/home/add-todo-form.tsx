@@ -21,11 +21,11 @@ export default function AddTodoForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="v-card v-field-focus flex h-12 items-center gap-3 px-5 sm:h-16 sm:gap-6 sm:px-6"
+      className="v-card v-field-focus group/field flex h-12 items-center gap-3 px-5 sm:h-16 sm:gap-6 sm:px-6"
     >
       <span
         aria-hidden="true"
-        className="border-edge size-5 shrink-0 rounded-full border sm:size-6"
+        className="border-edge group-has-focus-visible/field:border-accent size-5 shrink-0 rounded-full border group-has-focus-visible/field:border-2 motion-safe:transition-[border-color,border-width] sm:size-6"
       />
       <label htmlFor="new-todo" className="sr-only">
         Create a new todo
@@ -37,7 +37,7 @@ export default function AddTodoForm() {
         maxLength={200}
         autoComplete="off"
         placeholder="Create a new todo…"
-        className="text-item sm:text-item-lg text-field-ink caret-accent placeholder:text-muted min-w-0 flex-1 bg-transparent outline-none"
+        className="text-item sm:text-item-lg text-field-ink caret-accent placeholder:text-muted min-w-0 flex-1 bg-transparent focus-visible:outline-transparent"
       />
     </form>
   );

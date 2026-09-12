@@ -39,7 +39,7 @@ export function withThemeSweep(
   );
   root.dataset.sweep = closing ? "out" : "in";
 
-  const transition = document.startViewTransition(update);
-  transition.ready.catch(clearSweep);
-  transition.finished.then(clearSweep, clearSweep);
+  const sweep = document.startViewTransition(update);
+  sweep.ready.catch(clearSweep);
+  sweep.finished.then(clearSweep, clearSweep);
 }
