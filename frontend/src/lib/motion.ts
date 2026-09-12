@@ -34,14 +34,12 @@ export function shiftFrom(element: HTMLElement, distance: number) {
   );
 }
 
-function slide(element: HTMLElement, frames: Keyframe[], easing: string) {
+async function slide(element: HTMLElement, frames: Keyframe[], easing: string) {
   element.style.overflow = "clip";
 
-  return settle(
-    element.animate(frames, { duration: collapseDuration, easing }),
-  ).then(() => {
-    element.style.overflow = "";
-  });
+  await settle(element.animate(frames, { duration: collapseDuration, easing }));
+
+  element.style.overflow = "";
 }
 
 export function openRow(element: HTMLElement) {
