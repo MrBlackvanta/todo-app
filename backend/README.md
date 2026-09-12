@@ -28,7 +28,7 @@ That matches the default in `appsettings.Development.json`. To use a hosted data
 instead, set a user secret, which overrides that default and stays out of the repository:
 
 ```bash
-dotnet user-secrets set "ConnectionStrings:Default" "Host=...;Port=5432;Database=postgres;Username=...;Password=...;SSL Mode=Require"
+dotnet user-secrets set "ConnectionStrings:Default" "postgresql://postgres.<ref>:<password>@<pooler-host>:5432/postgres"
 ```
 
 Then:
@@ -72,6 +72,16 @@ the Render dashboard and never committed.
 Connect through a pooler rather than the direct host. The direct connection is IPv6-only on
 most managed providers and Render's egress is not, so a direct string fails to resolve from
 the deployed container while working fine from a laptop.
+
+Managed providers hand out a `postgresql://` URI and Npgsql only parses key-value form, so
+`DatabaseConnection` expands one into the other and passes anything else through untouched.
+Doing that in code rather than by hand is not a convenience: the URI percent-encodes the
+password, so a password containing `@` or `#` is silently wrong when retyped, and one
+containing `;` terminates the key-value string early unless it is quoted. A URI also implies a
+managed host, which is where `SSL Mode=Require` and a pool ceiling of 10 come from — a free
+pooler allows far fewer connections than Npgsql's default of 100. `Require` encrypts without
+verifying the certificate; pinning the provider's CA and moving to `VerifyFull` is the upgrade
+if this ever holds anything worth stealing.
 
 ## Who writes a list
 
