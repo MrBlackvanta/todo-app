@@ -74,8 +74,11 @@ most managed providers and Render's egress is not, so a direct string fails to r
 the deployed container while working fine from a laptop.
 
 Managed providers hand out a `postgresql://` URI and Npgsql only parses key-value form, so
-`DatabaseConnection` expands one into the other and passes anything else through untouched.
-Doing that in code rather than by hand is not a convenience: the URI percent-encodes the
+`DatabaseConnection` expands one into the other, passes a key-value string through, and rejects
+anything that is neither. That last case matters more than it looks: a value that silently falls
+through reaches Npgsql as a malformed connection string, and the parser error it raises names no
+cause and no variable, which is a long way to travel for a stray pair of quotes around a pasted
+URI. Doing that in code rather than by hand is not a convenience either: the URI percent-encodes the
 password, so a password containing `@` or `#` is silently wrong when retyped, and one
 containing `;` terminates the key-value string early unless it is quoted. A URI also implies a
 managed host, which is where `SSL Mode=Require` and a pool ceiling of 10 come from — a free
