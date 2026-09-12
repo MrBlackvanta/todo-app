@@ -12,6 +12,7 @@ const listeners = new Set<() => void>();
 const none: Todo[] = [];
 
 let todos: Todo[] | null = null;
+let stopSync: (() => void) | null = null;
 
 function storage() {
   try {
@@ -70,11 +71,16 @@ function subscribe(notify: () => void) {
   listeners.add(notify);
   window.addEventListener("storage", followOtherTabs);
 
-  if (listeners.size === 1) startSync(read(), keep);
+  if (listeners.size === 1) stopSync = startSync(read(), keep);
 
   return () => {
     listeners.delete(notify);
     window.removeEventListener("storage", followOtherTabs);
+
+    if (listeners.size > 0) return;
+
+    stopSync?.();
+    stopSync = null;
   };
 }
 

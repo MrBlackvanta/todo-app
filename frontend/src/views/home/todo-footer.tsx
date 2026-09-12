@@ -1,17 +1,18 @@
-import { clearCompleted } from "@/lib";
 import type { TodoFilter } from "@/types";
 import FilterGroup from "./filter-group";
 
 type TodoFooterProps = {
   activeCount: number;
-  completedCount: number;
+  canClear: boolean;
+  onClear: () => void;
   filter: TodoFilter;
   onFilterChange: (filter: TodoFilter) => void;
 };
 
 export default function TodoFooter({
   activeCount,
-  completedCount,
+  canClear,
+  onClear,
   filter,
   onFilterChange,
 }: TodoFooterProps) {
@@ -27,8 +28,8 @@ export default function TodoFooter({
       />
       <button
         type="button"
-        onClick={clearCompleted}
-        disabled={completedCount === 0}
+        onClick={onClear}
+        disabled={!canClear}
         className="enabled:hover:text-ink-hover disabled:text-dim col-start-3 justify-self-end motion-safe:transition-[color]"
       >
         Clear Completed

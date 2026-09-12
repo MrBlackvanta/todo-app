@@ -6,6 +6,7 @@ import { randomUuid } from "./id";
 const listIdKey = "list-id";
 const listParam = "list";
 const pushDelay = 600;
+const pollInterval = 5000;
 const devApi = "http://localhost:5180";
 const devHosts = ["localhost", "127.0.0.1"];
 const configuredApi = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -13,7 +14,9 @@ const configuredApi = process.env.NEXT_PUBLIC_API_URL ?? "";
 let api = "";
 let listId = "";
 let pushTimer = 0;
+let pollTimer = 0;
 let pending: Todo[] | null = null;
+let syncedAt = 0;
 
 function storage() {
   try {
@@ -42,8 +45,16 @@ async function pull(adopt: (todos: Todo[]) => void) {
     const response = await fetch(`${api}/lists/${listId}`);
     if (!response.ok) return;
 
-    const list = (await response.json()) as { items?: Todo[] };
-    if (list.items?.length) adopt(list.items);
+    const list = (await response.json()) as {
+      updatedAt?: string;
+      items?: Todo[];
+    };
+
+    const stamp = Date.parse(list.updatedAt ?? "");
+    if (!list.items || !(stamp > syncedAt)) return;
+
+    syncedAt = stamp;
+    adopt(list.items);
   } catch {
     return;
   }
@@ -60,8 +71,11 @@ async function push() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items }),
     });
+    if (!response.ok) return;
 
-    if (response.ok) showInUrl(listId);
+    const saved = (await response.json()) as { updatedAt?: string };
+    syncedAt = Date.parse(saved.updatedAt ?? "") || syncedAt;
+    showInUrl(listId);
   } catch {
     return;
   }
@@ -77,7 +91,7 @@ export function scheduleSave(todos: Todo[]) {
 
 export function startSync(local: Todo[], adopt: (todos: Todo[]) => void) {
   api = resolveApi();
-  if (!api) return;
+  if (!api) return () => {};
 
   const store = storage();
   const shared = new URLSearchParams(window.location.search).get(listParam);
@@ -87,10 +101,20 @@ export function startSync(local: Todo[], adopt: (todos: Todo[]) => void) {
   listId = adopting ? shared! : (saved ?? randomUuid());
   store?.setItem(listIdKey, listId);
 
-  if (adopting) {
+  function poll() {
+    if (!syncedAt || pending || document.hidden) return;
+
     void pull(adopt);
-    return;
   }
 
   if (local.length > 0) scheduleSave(local);
+  else void pull(adopt);
+
+  pollTimer = window.setInterval(poll, pollInterval);
+  document.addEventListener("visibilitychange", poll);
+
+  return () => {
+    window.clearInterval(pollTimer);
+    document.removeEventListener("visibilitychange", poll);
+  };
 }

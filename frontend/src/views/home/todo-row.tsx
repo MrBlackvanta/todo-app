@@ -77,6 +77,7 @@ export default function TodoRow({
               defaultValue={todo.title}
               maxLength={titleMaxLength}
               autoComplete="off"
+              enterKeyHint="done"
               aria-label={`Edit ${todo.title}`}
               onBlur={saveDraft}
               onKeyDown={handleDraftKeys}

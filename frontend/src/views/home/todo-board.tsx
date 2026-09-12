@@ -1,9 +1,15 @@
 "use client";
 
 import { useReorder } from "@/hooks";
-import { countActive, filterTodos, useTodos } from "@/lib";
+import {
+  clearCompleted,
+  closeRows,
+  countActive,
+  filterTodos,
+  useTodos,
+} from "@/lib";
 import type { TodoFilter } from "@/types";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AddTodoForm from "./add-todo-form";
 import FilterGroup from "./filter-group";
 import TodoFooter from "./todo-footer";
@@ -13,10 +19,27 @@ const reorderHelpId = "reorder-help";
 
 export default function TodoBoard() {
   const [filter, setFilter] = useState<TodoFilter>("all");
+  const [clearing, setClearing] = useState(false);
+  const list = useRef<HTMLDivElement>(null);
   const todos = useTodos();
   const activeCount = countActive(todos);
+  const completedCount = todos.length - activeCount;
   const reorderable = filter === "all" && todos.length > 1;
   const { draggingId, notice, rowHandlers } = useReorder(todos, reorderable);
+
+  async function clear() {
+    const completed = new Set(
+      todos.filter((todo) => todo.completed).map((todo) => todo.id),
+    );
+    const rows = [
+      ...(list.current?.querySelectorAll<HTMLElement>("[data-todo]") ?? []),
+    ].filter((row) => completed.has(row.dataset.todo ?? ""));
+
+    setClearing(true);
+    await closeRows(rows);
+    clearCompleted();
+    setClearing(false);
+  }
 
   return (
     <>
@@ -25,7 +48,7 @@ export default function TodoBoard() {
         aria-label="Your tasks"
         className="v-card mt-4 overflow-hidden sm:mt-6"
       >
-        <div className="v-reserve">
+        <div ref={list} className="v-reserve">
           <TodoList
             todos={filterTodos(todos, filter)}
             filter={filter}
@@ -36,7 +59,8 @@ export default function TodoBoard() {
         </div>
         <TodoFooter
           activeCount={activeCount}
-          completedCount={todos.length - activeCount}
+          canClear={completedCount > 0 && !clearing}
+          onClear={clear}
           filter={filter}
           onFilterChange={setFilter}
         />
