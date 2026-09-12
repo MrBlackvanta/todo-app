@@ -16,7 +16,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddDbContext<TodoDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default"))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
 );
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks().AddDbContextCheck<TodoDbContext>();
