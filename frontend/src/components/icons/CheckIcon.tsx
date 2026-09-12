@@ -11,7 +11,7 @@ export default function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <path d="M1 4.304L3.696 7l6-6" />
+      <path pathLength="1" d="M1 4.304L3.696 7l6-6" />
     </svg>
   );
 }

@@ -15,6 +15,16 @@
   --edge: #8d91c6;
   --accent: #246cfd;
   --cast: #c2c3d680;
+  --band: url("../assets/bg-mobile-light.webp");
+  --field: #edf3ff;
+  --field-ink: #393a4b;
+  --row: 3.3125rem;
+  --ring-idle: linear-gradient(var(--edge), var(--edge));
+  --ring-on: linear-gradient(
+    to bottom right,
+    var(--color-check-start),
+    var(--color-check-end)
+  );
 }
 
 html.dark {
@@ -28,6 +38,19 @@ html.dark {
   --edge: #6d6f90;
   --accent: #528bfd;
   --cast: #00000080;
+  --band: url("../assets/bg-mobile-dark.webp");
+  --field: #292f4c;
+  --field-ink: #c8cbe7;
+}
+
+@media (width >= 40rem) {
+  :root {
+    --band: url("../assets/bg-desktop-light.webp");
+    --row: 4.0625rem;
+  }
+  html.dark {
+    --band: url("../assets/bg-desktop-dark.webp");
+  }
 }
 
 @theme {
@@ -42,16 +65,34 @@ html.dark {
   --color-divider: var(--divider);
   --color-edge: var(--edge);
   --color-accent: var(--accent);
+  --color-field: var(--field);
+  --color-field-ink: var(--field-ink);
   --color-check-start: #55ddff;
   --color-check-end: #c058f3;
 
+  --text-item: 0.875rem;
+  --text-item--line-height: 1.25rem;
+  --text-item--letter-spacing: -0.0139em;
+  --text-item-lg: 1.125rem;
+  --text-item-lg--line-height: 1.5rem;
+  --text-item-lg--letter-spacing: -0.0139em;
+
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1;
+  --text-meta--letter-spacing: -0.0139em;
+  --text-meta-lg: 0.875rem;
+  --text-meta-lg--line-height: 1;
+  --text-meta-lg--letter-spacing: -0.0139em;
+
   --text-logo: 1.625rem;
   --text-logo--line-height: 1;
+  --text-logo--letter-spacing: 0.375em;
   --text-logo-lg: 2.5rem;
   --text-logo-lg--line-height: 1;
+  --text-logo-lg--letter-spacing: 0.375em;
 
-  --tracking-item: -0.0139em;
-  --tracking-logo: 0.375em;
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-out);
 
   --container-app: 33.75rem;
   --radius-card: 0.3125rem;
@@ -68,7 +109,7 @@ html.dark {
     color-scheme: dark;
   }
   body {
-    @apply bg-page text-ink tracking-item leading-none;
+    @apply bg-page text-ink leading-none;
   }
   button:not(:disabled) {
     cursor: pointer;
@@ -78,12 +119,94 @@ html.dark {
   }
 }
 
+@utility v-band {
+  background-image: var(--band);
+}
+
 @utility v-band-focus {
   @apply focus-visible:outline-white;
 }
 
-@utility v-check-fill {
-  @apply from-check-start to-check-end bg-linear-to-br/srgb;
+@utility v-card {
+  @apply bg-surface rounded-card shadow-card;
+}
+
+@utility v-field-focus {
+  @apply motion-safe:transition-colors;
+  &:has(:focus-visible) {
+    @apply bg-field outline-accent outline-2 outline-offset-2;
+  }
+}
+
+@utility v-check {
+  --check-fill: var(--surface);
+  --check-ring: var(--ring-idle);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--check-fill), var(--check-fill)) padding-box,
+    var(--check-ring) border-box;
+
+  @variant hover {
+    --check-ring: var(--ring-on);
+  }
+
+  &[data-done] {
+    --check-fill: transparent;
+    --check-ring: var(--ring-on);
+
+    .v-tick {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@utility v-tick {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 180ms ease-out;
+}
+
+@utility v-reserve {
+  min-height: calc(var(--reserved-rows, 1) * var(--row));
+}
+
+@utility v-row-action {
+  @media (hover: hover) and (width >= 40rem) {
+    opacity: 0;
+  }
+}
+
+[data-sweep]::view-transition-old(root),
+[data-sweep]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+[data-sweep="in"]::view-transition-new(root) {
+  animation: v-sweep-open 500ms ease-in-out forwards;
+}
+
+[data-sweep="out"]::view-transition-old(root) {
+  z-index: 1;
+  animation: v-sweep-close 500ms ease-in-out forwards;
+}
+
+@keyframes v-sweep-open {
+  from {
+    clip-path: circle(0% at var(--sweep-x) var(--sweep-y));
+  }
+  to {
+    clip-path: circle(var(--sweep-r) at var(--sweep-x) var(--sweep-y));
+  }
+}
+
+@keyframes v-sweep-close {
+  from {
+    clip-path: circle(var(--sweep-r) at var(--sweep-x) var(--sweep-y));
+  }
+  to {
+    clip-path: circle(0% at var(--sweep-x) var(--sweep-y));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

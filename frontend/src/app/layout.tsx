@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Josefin_Sans } from "next/font/google";
 import { SITE_URL } from "@/app/site";
+import { themeScript, todosScript } from "@/lib";
 import "./globals.css";
 
 const name = "TODO";
@@ -64,7 +65,12 @@ export default function RootLayout({
       className={`${josefinSans.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body>
+        <script
+          dangerouslySetInnerHTML={{ __html: `${themeScript};${todosScript}` }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
