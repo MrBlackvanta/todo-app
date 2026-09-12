@@ -14,7 +14,9 @@ public static class DatabaseConnection
 
         if (configured.Length == 0)
         {
-            throw new InvalidOperationException($"ConnectionStrings__Default is not set. {Expected}");
+            throw new InvalidOperationException(
+                $"ConnectionStrings__Default is not set. {Expected}"
+            );
         }
 
         if (!IsPostgresUri(configured))

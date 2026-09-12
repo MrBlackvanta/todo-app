@@ -38,9 +38,16 @@ cd backend
 dotnet run
 ```
 
-The service listens on `http://localhost:5180` and creates its tables on first run.
+The service listens on `http://localhost:5180` and applies any pending migrations on startup.
 
 Interactive docs: open `http://localhost:5180/scalar/v1` in a browser.
+
+Changing the model means a new migration, which needs the EF Core tools
+(`dotnet tool install --global dotnet-ef`):
+
+```bash
+dotnet ef migrations add <Name> -o Data/Migrations
+```
 
 ## Endpoints
 
@@ -85,6 +92,22 @@ managed host, which is where `SSL Mode=Require` and a pool ceiling of 10 come fr
 pooler allows far fewer connections than Npgsql's default of 100. `Require` encrypts without
 verifying the certificate; pinning the provider's CA and moving to `VerifyFull` is the upgrade
 if this ever holds anything worth stealing.
+
+## Why migrations, not EnsureCreated
+
+`EnsureCreated` is fine against a disposable file and silently useless against a managed
+Postgres. It creates the schema only when the database has no tables at all, and Npgsql's check
+counts every schema except `pg_catalog` and `information_schema` — so a Supabase project, which
+ships its own `auth` and `storage` tables before you write a line, always looks populated. The
+call returns `false`, creates nothing, and the service starts perfectly. `/health` stays green,
+because a connectivity probe opens a connection without touching a table. Every real query then
+fails on a table that was never created.
+
+That is the trap worth remembering: a green health check and a broken database are the same
+observation unless the probe touches what the queries touch. `MigrateAsync` replaces it, and the
+schema now lives in `Data/Migrations` where a change to the model is a reviewable file rather
+than a silent no-op. Migrating on startup is only safe because one instance runs; more than one
+needs the migration to move out of the boot path.
 
 ## Who writes a list
 

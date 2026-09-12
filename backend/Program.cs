@@ -19,7 +19,9 @@ builder.Services.AddDbContext<TodoDbContext>(options =>
     options.UseNpgsql(DatabaseConnection.Resolve(builder.Configuration))
 );
 builder.Services.AddProblemDetails();
-builder.Services.AddHealthChecks().AddDbContextCheck<TodoDbContext>();
+builder
+    .Services.AddHealthChecks()
+    .AddDbContextCheck<TodoDbContext>(customTestQuery: ListsTableResponds);
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -123,7 +125,14 @@ app.MapPut(
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
 }
 
 app.Run();
+
+static async Task<bool> ListsTableResponds(TodoDbContext db, CancellationToken token)
+{
+    await db.Lists.AnyAsync(token);
+
+    return true;
+}
