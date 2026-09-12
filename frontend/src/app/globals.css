@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@source not "../../*.md";
+@source not "../../../*.md";
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-josefin-sans), ui-sans-serif, system-ui, sans-serif;
+}
