@@ -18,6 +18,10 @@ type TodoRowProps = {
   handlers: DOMAttributes<HTMLLIElement>;
 };
 
+function ignoreHeldKey(event: KeyboardEvent<HTMLButtonElement>) {
+  if (event.repeat) event.preventDefault();
+}
+
 export default function TodoRow({
   todo,
   dragging,
@@ -113,6 +117,7 @@ export default function TodoRow({
                 ref={editButton}
                 type="button"
                 onClick={() => setEditing(true)}
+                onKeyDown={ignoreHeldKey}
                 className="-m-1.5 p-1.5"
               >
                 <span className="sr-only">Edit {todo.title}</span>
