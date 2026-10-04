@@ -7,7 +7,7 @@ namespace TodoApi.Data.Migrations
     /// <inheritdoc />
     public partial class EnableRowLevelSecurity : Migration
     {
-        static readonly string[] Tables = ["Lists", "Items", "__EFMigrationsHistory"];
+        static readonly string[] Tables = ["Lists", "Items"];
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

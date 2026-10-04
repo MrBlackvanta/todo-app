@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
-public class TodoDbContext(DbContextOptions<TodoDbContext> options) : DbContext(options)
+public class TodoDbContext(DbContextOptions<TodoDbContext> options, DatabaseSchema schema)
+    : DbContext(options)
 {
     public DbSet<TodoList> Lists => Set<TodoList>();
 
@@ -8,6 +9,8 @@ public class TodoDbContext(DbContextOptions<TodoDbContext> options) : DbContext(
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(schema.Name);
+
         modelBuilder.Entity<TodoList>(b =>
         {
             b.HasKey(list => list.Id);

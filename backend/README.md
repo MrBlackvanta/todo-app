@@ -38,7 +38,8 @@ cd backend
 dotnet run
 ```
 
-The service listens on `http://localhost:5180` and applies any pending migrations on startup.
+The service listens on `http://localhost:5180` and applies any pending migrations on startup,
+because `appsettings.Development.json` opts in; see the migration gate below.
 
 Interactive docs: open `http://localhost:5180/scalar/v1` in a browser.
 
@@ -93,10 +94,53 @@ cause and no variable, which is a long way to travel for a stray pair of quotes 
 URI. Doing that in code rather than by hand is not a convenience either: the URI percent-encodes the
 password, so a password containing `@` or `#` is silently wrong when retyped, and one
 containing `;` terminates the key-value string early unless it is quoted. A URI also implies a
-managed host, which is where `SSL Mode=Require` and a pool ceiling of 10 come from — a free
-pooler allows far fewer connections than Npgsql's default of 100. `Require` encrypts without
-verifying the certificate; pinning the provider's CA and moving to `VerifyFull` is the upgrade
-if this ever holds anything worth stealing.
+managed host, which is where `SSL Mode=Require`, a pool ceiling of 5 and a sixty-second idle
+lifetime come from — a free pooler allows far fewer connections than Npgsql's default of 100.
+`Require` encrypts without verifying the certificate; pinning the provider's CA and moving to
+`VerifyFull` is the upgrade if this ever holds anything worth stealing.
+
+That ceiling is arithmetic rather than taste. A free instance allows 60 database connections,
+and the platform's own services plus the superuser reservation take roughly half. Session mode
+— what the dashboard's port-5432 URI gives, and what Render needs because the direct host is
+IPv6-only — pins one database connection per pooled client for the life of the session, so the
+limit that binds is that 60 rather than the pooler's 200 client slots. Budget two instances per
+service across a deploy and the sum is apps × 2 × `MaxPoolSize` against roughly 32 usable, so
+five leaves room for a third service. The idle lifetime matters here for the same reason and
+would not on a dedicated database: a service sitting idle on its connections is holding slots a
+neighbour needs.
+
+## One database, a schema per app
+
+The free plan grants two projects per organisation and both were spent, which left a third
+service wanting a database with nowhere to put one. So the two backends share a single project
+and take a schema each — `todo` here, `invoice` next door — rather than a project each. These
+lists are the irreplaceable half of that pair, so they stay in the project they were created
+in and move only from `public` to `todo`; the invoice service, which re-seeds itself whenever
+its table is empty, is the one that travels.
+
+Sharing needs both halves of the move, and either half alone is worse than neither.
+`HasDefaultSchema` moves the tables; `MigrationsHistoryTable` moves the ledger recording which
+migrations have run. Move only the tables and both services keep reading and writing
+`public.__EFMigrationsHistory`, where each reads the other's migration ids as its own history
+and then generates a migration dropping the other's tables. The two calls sit beside each other
+in `Program.cs`, fed by the same local, so they cannot drift apart.
+
+The schema name is configuration rather than a constant, so one connection string serves every
+service and only `Database__Schema` differs between them. `DatabaseSchema` refuses anything
+that is not a bare identifier, because the value reaches generated DDL rather than a parameter.
+It is per service and close to permanent: `MoveToOwnSchema` names the schema it moves to, so
+repointing an existing service at a different one needs a new migration rather than just a new
+variable.
+
+Row-level security on `Lists` and `Items` dates from when they sat in `public` and the Data API
+could reach them. It has no policies, which denies everything to any role that does not bypass
+it, and the flag travels with the table through `SET SCHEMA`, so it survives the move and costs
+nothing. Leaving `public` is the stronger version of the same protection. What no longer
+carries RLS is the migration ledger, which was in that list too: enabling it on the table EF
+reads to decide what has already run is a quiet trap, because a role that stopped bypassing RLS
+would read zero applied migrations and replay all of them against populated tables. Dropping it
+from the list also repairs a fresh database, where that statement named a `public` table the
+ledger had already left.
 
 ## Why migrations, not EnsureCreated
 
@@ -113,6 +157,13 @@ observation unless the probe touches what the queries touch. `MigrateAsync` repl
 schema now lives in `Data/Migrations` where a change to the model is a reviewable file rather
 than a silent no-op. Migrating on startup is only safe because one instance runs; more than one
 needs the migration to move out of the boot path.
+
+Applying them is gated. `Migrations__Apply` defaults to false, and a boot that finds pending
+migrations without it refuses to start rather than serving against a schema it does not match.
+Render holds the previous instance when a new one fails its health check, so a refusal costs a
+no-op deploy instead of an outage, and the deploy that *should* migrate is one where the
+variable was set deliberately. These lists are user-created and shared by their id, so an
+unattended migration against them is the one failure with nothing behind it.
 
 ## Who writes a list
 

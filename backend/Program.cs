@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,9 +16,17 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ITodoService, TodoService>();
+
+var schema = DatabaseSchema.Resolve(builder.Configuration);
+
+builder.Services.AddSingleton(schema);
 builder.Services.AddDbContext<TodoDbContext>(options =>
-    options.UseNpgsql(DatabaseConnection.Resolve(builder.Configuration))
+    options.UseNpgsql(
+        DatabaseConnection.Resolve(builder.Configuration),
+        npgsql => npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, schema.Name)
+    )
 );
+
 builder.Services.AddProblemDetails();
 builder
     .Services.AddHealthChecks()
@@ -123,11 +132,7 @@ app.MapPut(
     .Produces<TodoListDto>(StatusCodes.Status200OK)
     .ProducesProblem(StatusCodes.Status400BadRequest);
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
-    await db.Database.MigrateAsync();
-}
+await DatabaseMigrations.EnsureUpToDateAsync<TodoDbContext>(app.Services);
 
 app.Run();
 

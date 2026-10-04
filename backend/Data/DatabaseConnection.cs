@@ -63,7 +63,8 @@ public static class DatabaseConnection
             Password =
                 credentials.Length > 1 ? Uri.UnescapeDataString(credentials[1]) : string.Empty,
             SslMode = SslMode.Require,
-            MaxPoolSize = 10,
+            MaxPoolSize = 5,
+            ConnectionIdleLifetime = 60,
         }.ConnectionString;
     }
 }
