@@ -94,7 +94,7 @@ cause and no variable, which is a long way to travel for a stray pair of quotes 
 URI. Doing that in code rather than by hand is not a convenience either: the URI percent-encodes the
 password, so a password containing `@` or `#` is silently wrong when retyped, and one
 containing `;` terminates the key-value string early unless it is quoted. A URI also implies a
-managed host, which is where `SSL Mode=Require`, a pool ceiling of 5 and a sixty-second idle
+managed host, which is where `SSL Mode=Require`, a pool ceiling of 4 and a sixty-second idle
 lifetime come from — a free pooler allows far fewer connections than Npgsql's default of 100.
 `Require` encrypts without verifying the certificate; pinning the provider's CA and moving to
 `VerifyFull` is the upgrade if this ever holds anything worth stealing.
@@ -104,16 +104,18 @@ and the platform's own services plus the superuser reservation take roughly half
 — what the dashboard's port-5432 URI gives, and what Render needs because the direct host is
 IPv6-only — pins one database connection per pooled client for the life of the session, so the
 limit that binds is that 60 rather than the pooler's 200 client slots. Budget two instances per
-service across a deploy and the sum is apps × 2 × `MaxPoolSize` against roughly 32 usable, so
-five leaves room for a third service. The idle lifetime matters here for the same reason and
+service across a deploy and the sum is apps × 2 × `MaxPoolSize` against roughly 32 usable.
+Four services share this database, so the ceiling is 4, not the 5 that fitted three. The idle
+lifetime matters here for the same reason and
 would not on a dedicated database: a service sitting idle on its connections is holding slots a
 neighbour needs.
 
 ## One database, a schema per app
 
 The free plan grants two projects per organisation and both were spent, which left a third
-service wanting a database with nowhere to put one. So the two backends share a single project
-and take a schema each — `todo` here, `invoice` next door — rather than a project each. These
+service wanting a database with nowhere to put one. So the backends share a single project
+and take a schema each — `todo` here, with `invoice`, `audiophile` and `feedback` next door —
+rather than a project each. These
 lists are the irreplaceable half of that pair, so they stay in the project they were created
 in and move only from `public` to `todo`; the invoice service, which re-seeds itself whenever
 its table is empty, is the one that travels.
